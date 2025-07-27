@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SkyCheck Weather App</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <h1>SkyCheck 🌤️</h1>
+  <form id="weatherForm">
+    <input type="text" id="city" placeholder="Enter city name" required />
+    <button type="submit">Get Weather</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById("weatherForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const cityInput = document.getElementById("city");
+      const city = cityInput.value.trim();
+
+      const result = document.getElementById("result");
+      result.innerHTML = "";  // Clear previous result
+
+      if (!city) {
+        result.innerHTML = "<p>Please enter a city name.</p>";
+        return;
+      }
+
+      try {
+        const response = await fetch("/weather", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ city }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          result.innerHTML = `
+            <h3>Weather in ${data.city}</h3>
+            <p>🌡️ Temperature: ${data.temperature}°C</p>
+            <p>🌫️ Description: ${data.description}</p>
+            <p>💧 Humidity: ${data.humidity}%</p>
+          `;
+        } else {
+          const errorData = await response.json();
+          result.innerHTML = `<p>❌ ${errorData.error || "City not found"}</p>`;
+        }
+      } catch (err) {
+        result.innerHTML = "<p>❌ Error fetching weather data. Please try again.</p>";
+      }
+    });
+  </script>
+</body>
+</html>
